@@ -1,0 +1,118 @@
+.clipPathCircle{
+    color: aliceblue;
+    position: fixed;
+    background-color: #032030;
+    width: 50%;
+    height: 100vh;
+    clip-path: circle(66.1% at 0 49%);
+}
+
+.App{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    height: 100vh;
+}
+.boxContainer{
+    margin-left: 40%;
+}
+
+.clipPathCircle form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.clipPathCircle label {
+    margin-bottom: 10px;
+}
+
+.clipPathCircle input {
+    width: 130px;
+    text-align: center;
+    padding: 5px;
+    border: none;
+    font-size: 20px;
+    margin-bottom: 50px;
+
+}
+
+.clipPathCircle button {
+    padding: 10px 20px;
+    background-color: #1287c6;
+    color: aliceblue;
+    border: none;
+    cursor: pointer;
+    border-radius: 15px;
+}
+
+.clipPathCircle button:hover {
+    background-color: #0e6ea8;
+
+}
+
+
+.searchContainer{
+    display: flex;
+    flex-direction: column;
+    width: 35%;
+    margin-top: 35%;
+    margin-left: 10%;
+}
+
+.LogoImg img {
+    position: fixed;
+    left: 0;
+    top: 0;
+    margin-top: 1rem;
+    margin-left: 1rem;
+    width: 110px;
+  }
+
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.table th, .table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.table th {
+    background-color: #1287c6;
+    color: white;
+}
+
+.table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+
+.ContribuyenteContainer{
+    margin-bottom: 100px;
+    margin-top: 100px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 600px;
+}
+
+.ContribuyenteContainer img{
+    width: 110px;
+    height: 75px;
+    margin-top: 1rem;
+}
+
+.ilustrationImg {
+    position: fixed;
+    right: 0;
+    bottom: 0px;
+  }
