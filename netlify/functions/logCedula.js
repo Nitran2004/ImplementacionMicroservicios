@@ -4,15 +4,7 @@ export default async (req) => {
       return new Response("Method Not Allowed", { status: 405 });
     }
 
-    const body = await req.text();
-    let data = {};
-    try {
-      data = body ? JSON.parse(body) : {};
-    } catch {
-      data = {};
-    }
-
-    const cedula = data?.cedula;
+    const { cedula } = await req.json();
 
     if (!cedula) {
       return new Response(JSON.stringify({ ok: false, error: "cedula requerida" }), {
@@ -39,24 +31,20 @@ export default async (req) => {
 
     await client.connect();
 
-    await client.query("INSERT INTO public.consultas (cedula) VALUES ($1)", [cedula]);
+    // esto evita que vuelva a fallar si la tabla no está en esa db
+    await client.query(`
+      create table if not exists public.consultas (
+        id bigserial primary key,
+        cedula text not null,
+        fecha timestamptz not null default now()
+      );
+    `);
 
-    let info = null;
-    if (process.env.DEBUG_DB === "1") {
-      const r = await client.query(`
-        SELECT
-          current_database() AS db,
-          current_schema() AS schema,
-          inet_server_addr()::text AS server_addr,
-          inet_server_port() AS server_port,
-          to_regclass('public.consultas') AS existe;
-      `);
-      info = r.rows[0];
-    }
+    await client.query("insert into public.consultas (cedula) values ($1)", [cedula]);
 
     await client.end();
 
-    return new Response(JSON.stringify({ ok: true, info }), {
+    return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
