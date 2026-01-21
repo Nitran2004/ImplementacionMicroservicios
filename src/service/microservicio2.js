@@ -1,12 +1,16 @@
-export function microservicio2(id) {
-    const url = `http://localhost:4202/obtenerPuntaje/${id}`;
-    return fetch(url, { method: 'GET' }) // Hacer la petición GET
-    .then(response => response.json()) // Convertir solo el cuerpo de la respuesta a JSON
-    .then(data => {
-        return (data);
-    })
-    .catch(error => {
-        console.error(error);
-        return '';
-    });
-}
+const BASE = process.env.REACT_APP_MS2_URL;
+
+export const microservicio2 = async (cedula) => {
+  if (!BASE) {
+    throw new Error("REACT_APP_MS2_URL no está configurada");
+  }
+
+  const res = await fetch(`${BASE}/obtenerPuntaje/${cedula}`);
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`microservicio2 fallo (${res.status}) ${text}`);
+  }
+
+  return await res.json();
+};
