@@ -17,38 +17,55 @@ export default async (req) => {
       });
     }
 
-    const connStr =
-      process.env.NETLIFY_DATABASE_URL || process.env.NETLIFY_DATABASE_URL_UNPOOLED;
+    // Obtén la URL de conexión
+    const connStr = process.env.DATABASE_URL;
 
     if (!connStr) {
-      return new Response(JSON.stringify({ ok: false, error: "NETLIFY_DATABASE_URL no configurada" }), {
+      console.error("DATABASE_URL no está configurada");
+      return new Response(JSON.stringify({ ok: false, error: "DATABASE_URL no configurada" }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
       });
     }
 
+    // Importa pg
     const { Client } = await import("pg");
+    
+    // Crea el cliente
     const client = new Client({
       connectionString: connStr,
-      ssl: { rejectUnauthorized: false },
+      ssl: {
+        rejectUnauthorized: false,
+      },
     });
 
+    // Conecta
     await client.connect();
+    console.log("Conectado a PostgreSQL exitosamente");
 
-    // Inserta SIEMPRE (si tu tabla tiene UNIQUE en cedula, esto fallará; abajo te digo cómo arreglarlo)
-    await client.query(
-      "INSERT INTO public.consultas (cedula) VALUES ($1)",
+    // Inserta la cédula
+    const result = await client.query(
+      "INSERT INTO public.consultas (cedula, fecha) VALUES ($1, NOW()) RETURNING id",
       [cedula]
     );
 
     await client.end();
 
-    return new Response(JSON.stringify({ ok: true }), {
+    return new Response(JSON.stringify({ 
+      ok: true, 
+      message: "Cédula guardada correctamente",
+      id: result.rows[0]?.id
+    }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
+
   } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: String(e?.message || e) }), {
+    console.error("Error en logCedula:", e);
+    return new Response(JSON.stringify({ 
+      ok: false, 
+      error: String(e?.message || e) 
+    }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
