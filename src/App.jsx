@@ -12,6 +12,7 @@ function App() {
   const notify = () => toast("Proceso exitoso");
   //Notificacion de error
   const notifyError = () => toast.error("Error, introduzca una cedula valida");
+  
   //Estado para guardar la cedula
   const [cedula, setCedula] = useState('');
   //Estado para mostrar la tabla
@@ -39,6 +40,12 @@ function App() {
     resetearValores();
     if (validarCedula(cedula)) {
       try {
+        await fetch("/.netlify/functions/logCedula", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ cedula }),
+});
+
         //Llamada al microservicio 1
         const respuesta = await microservicio1(cedula + '001')
         setInfo(prevState => ({
@@ -72,9 +79,8 @@ function App() {
 
   return (
     <div className="App">
-      <div class="clipPathCircle">
-
-        <div class="LogoImg">
+      <div className="clipPathCircle">
+        <div className="LogoImg">
           <img src="/logo.png" alt=""></img>
         </div>
         <div className='searchContainer'>
@@ -90,8 +96,8 @@ function App() {
           </form>
         </div>
       </div>
-      <div className='boxContainer'>
 
+      <div className='boxContainer'>
         {mostrarContribuyente ? (
           <div className='ContribuyenteContainer'>
             <div>
@@ -99,12 +105,19 @@ function App() {
               {info.contribuyente ? "Si" : "No"}
             </div>
             <div>
-                <img src="/sri.png" alt=""></img>
+              <img src="/sri.png" alt=""></img>
             </div>
           </div>
         ) : (<p></p>)}
-        {mostrarTabla ? (<TableInfo puntosMatricula={info.puntosMatricula} nombre={info.nombre} />) : (<p></p>)}
+        
+        {mostrarTabla ? (
+          <TableInfo puntosMatricula={info.puntosMatricula} nombre={info.nombre} />
+        ) : (<p></p>)}
+
+
+
       </div>
+
       <img className='ilustrationImg' src="/person.png" alt="" />
     </div>
   );
