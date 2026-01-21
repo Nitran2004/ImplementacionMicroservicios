@@ -4,6 +4,15 @@ export default async (req, context) => {
       return new Response("Method Not Allowed", { status: 405 });
     }
 
+    const { cedula } = await req.json();
+
+    if (!cedula) {
+      return new Response(JSON.stringify({ ok: false, error: "cedula requerida" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const connStr =
       process.env.NETLIFY_DATABASE_URL || process.env.NETLIFY_DATABASE_URL_UNPOOLED;
 
@@ -21,11 +30,10 @@ export default async (req, context) => {
     });
 
     await client.connect();
-
-    const existe = await client.query(`SELECT to_regclass('public.consultas') AS existe;`);
+    await client.query("INSERT INTO public.consultas (cedula) VALUES ($1)", [cedula]);
     await client.end();
 
-    return new Response(JSON.stringify({ ok: true, existe: existe.rows[0].existe }), {
+    return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
