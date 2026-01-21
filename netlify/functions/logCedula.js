@@ -4,26 +4,14 @@ export default async (req, context) => {
       return new Response("Method Not Allowed", { status: 405 });
     }
 
-    const { cedula } = await req.json();
-
-    if (!cedula) {
-      return new Response(JSON.stringify({ ok: false, error: "cedula requerida" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
     const connStr =
       process.env.NETLIFY_DATABASE_URL || process.env.NETLIFY_DATABASE_URL_UNPOOLED;
 
     if (!connStr) {
-      return new Response(
-        JSON.stringify({ ok: false, error: "NETLIFY_DATABASE_URL no configurada" }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      return new Response(JSON.stringify({ ok: false, error: "NETLIFY_DATABASE_URL no configurada" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const { Client } = await import("pg");
@@ -34,14 +22,10 @@ export default async (req, context) => {
 
     await client.connect();
 
-    const info = await client.query(`
-      SELECT current_database() AS db,
-             current_schema() AS schema;
-    `);
-
+    const existe = await client.query(`SELECT to_regclass('public.consultas') AS existe;`);
     await client.end();
 
-    return new Response(JSON.stringify({ ok: true, info: info.rows[0] }), {
+    return new Response(JSON.stringify({ ok: true, existe: existe.rows[0].existe }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
