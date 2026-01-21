@@ -36,30 +36,37 @@ function App() {
     e.preventDefault();
     resetearValores();
 
-    if (!validarCedula(cedula)) {
+    const ced = String(cedula || "").trim();
+
+    if (!validarCedula(ced)) {
       notifyError();
       return;
     }
 
     // 1) Guardar cédula SIEMPRE (no rompas el flujo si falla)
     try {
+      console.log("Guardando cédula en DB:", ced);
+
       const r = await fetch("/.netlify/functions/logCedula", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cedula }),
+        body: JSON.stringify({ cedula: ced }),
       });
 
+      const text = await r.text().catch(() => "");
+      console.log("logCedula status:", r.status, "body:", text);
+
       if (!r.ok) {
-        const t = await r.text().catch(() => "");
-        console.log("logCedula fallo:", r.status, t);
+        notifyWarn("No se pudo guardar la cédula (DB)");
       }
     } catch (err) {
       console.log("No se pudo guardar cédula:", err);
+      notifyWarn("No se pudo guardar la cédula (DB)");
     }
 
     // 2) Microservicio 1 (contribuyente)
     try {
-      const respuesta = await microservicio1(cedula + "001");
+      const respuesta = await microservicio1(ced + "001");
       setInfo((prev) => ({
         ...prev,
         contribuyente: respuesta?.valida,
@@ -72,7 +79,7 @@ function App() {
 
     // 3) Microservicio 2 (puntos/nombre)
     try {
-      const respuesta2 = await microservicio2(cedula);
+      const respuesta2 = await microservicio2(ced);
       if (respuesta2?.nombre !== "") {
         setInfo((prev) => ({
           ...prev,

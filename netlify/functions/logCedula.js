@@ -1,10 +1,14 @@
 export default async (req) => {
   try {
     if (req.method !== "POST") {
-      return new Response("Method Not Allowed", { status: 405 });
+      return new Response(JSON.stringify({ ok: false, error: "Method Not Allowed" }), {
+        status: 405,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    const { cedula } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const cedula = String(body.cedula || "").trim();
 
     if (!cedula) {
       return new Response(JSON.stringify({ ok: false, error: "cedula requerida" }), {
@@ -31,16 +35,11 @@ export default async (req) => {
 
     await client.connect();
 
-    // esto evita que vuelva a fallar si la tabla no está en esa db
-    await client.query(`
-      create table if not exists public.consultas (
-        id bigserial primary key,
-        cedula text not null,
-        fecha timestamptz not null default now()
-      );
-    `);
-
-    await client.query("insert into public.consultas (cedula) values ($1)", [cedula]);
+    // Inserta SIEMPRE (si tu tabla tiene UNIQUE en cedula, esto fallará; abajo te digo cómo arreglarlo)
+    await client.query(
+      "INSERT INTO public.consultas (cedula) VALUES ($1)",
+      [cedula]
+    );
 
     await client.end();
 
