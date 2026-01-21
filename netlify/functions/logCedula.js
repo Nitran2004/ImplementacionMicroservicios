@@ -13,7 +13,8 @@ export default async (req, context) => {
       });
     }
 
-    const connStr = process.env.NETLIFY_DATABASE_URL;
+    const connStr =
+      process.env.NETLIFY_DATABASE_URL || process.env.NETLIFY_DATABASE_URL_UNPOOLED;
 
     if (!connStr) {
       return new Response(JSON.stringify({ ok: false, error: "NETLIFY_DATABASE_URL no configurada" }), {
@@ -23,10 +24,13 @@ export default async (req, context) => {
     }
 
     const { Client } = await import("pg");
-    const client = new Client({ connectionString: connStr, ssl: { rejectUnauthorized: false } });
+    const client = new Client({
+      connectionString: connStr,
+      ssl: { rejectUnauthorized: false },
+    });
 
     await client.connect();
-    await client.query("INSERT INTO consultas (cedula) VALUES ($1)", [cedula]);
+await client.query('INSERT INTO public.consultas (cedula) VALUES ($1)', [cedula]);
     await client.end();
 
     return new Response(JSON.stringify({ ok: true }), {
